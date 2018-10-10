@@ -1,0 +1,50 @@
+{
+  "name": "signalr-client-miniapp",
+  "version": "0.1.0",
+  "description": "This is ASP.NET Core SignalR Client for Miniapp",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "typings": "./dist/esm/index.d.ts",
+  "umd": "./dist/browser/signalr-client-miniapp.js",
+  "umd_name": "signalr-client-miniapp",
+  "scripts": {
+    "clean": "node ./node_modules/rimraf/bin.js ./dist",
+    "build": "npm run clean && npm run build:lint && npm run build:esm && npm run build:cjs && npm run build:browser && npm run build:uglify",
+    "build:lint": "node ./node_modules/tslint/bin/tslint -c ./tslint.json -p ./tsconfig.json",
+    "build:esm": "node ./node_modules/typescript/bin/tsc --project ./tsconfig.json --module es2015 --outDir ./dist/esm -d && node ./build/process-dts.js",
+    "build:cjs": "node ./node_modules/typescript/bin/tsc --project ./tsconfig.json --module commonjs --outDir ./dist/cjs",
+    "build:browser": "node ./node_modules/webpack-cli/bin/cli.js",
+    "build:uglify": "node ./node_modules/uglify-js/bin/uglifyjs --source-map \"url='signalr-client-miniapp.min.js.map',content='./dist/browser/signalr-client-miniapp.js.map'\" --comments -o ./dist/browser/signalr-client-miniapp.min.js ./dist/browser/signalr-client-miniapp.js",
+    "prepack": "node ./build/embed-version.js",
+    "test": "echo \"no test\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:fangqifan/signalr-client-miniapp.git"
+  },
+  "author": "Microsoft",
+  "contributors": [
+    "fangqifan"
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/fangqifan/signalr-client-miniapp/issues"
+  },
+  "homepage": "https://github.com/fangqifan/signalr-client-miniapp",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^8.5.2",
+    "@types/webpack": "^4.4.0",
+    "es6-promise": "^4.2.2",
+    "rimraf": "^2.6.2",
+    "ts-loader": "^4.5.0",
+    "tslint": "^5.9.1",
+    "typescript": "^2.7.1",
+    "uglify-js": "^3.3.5",
+    "webpack": "^4.12.0",
+    "webpack-cli": "^3.0.3"
+  }
+}

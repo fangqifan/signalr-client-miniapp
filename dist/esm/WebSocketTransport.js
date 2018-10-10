@@ -1,0 +1,145 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+import { LogLevel } from "./ILogger";
+import { TransferFormat } from "./ITransport";
+import { Arg, getDataDetail } from "./Utils";
+/** @private */
+var WebSocketTransport = /** @class */ (function () {
+    function WebSocketTransport(accessTokenFactory, logger, logMessageContent) {
+        this.logger = logger;
+        this.accessTokenFactory = accessTokenFactory;
+        this.logMessageContent = logMessageContent;
+        this.state = false;
+        this.onreceive = null;
+        this.onclose = null;
+    }
+    WebSocketTransport.prototype.connect = function (url, transferFormat) {
+        return __awaiter(this, void 0, void 0, function () {
+            var token;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Arg.isRequired(url, "url");
+                        Arg.isRequired(transferFormat, "transferFormat");
+                        Arg.isIn(transferFormat, TransferFormat, "transferFormat");
+                        this.logger.log(LogLevel.Trace, "(WebSockets transport) Connecting");
+                        if (!this.accessTokenFactory) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.accessTokenFactory()];
+                    case 1:
+                        token = _a.sent();
+                        if (token) {
+                            url += (url.indexOf("?") < 0 ? "?" : "&") + ("access_token=" + encodeURIComponent(token));
+                        }
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, new Promise(function (resolve, reject) {
+                            url = url.replace(/^http/, "ws");
+                            var webSocket = wx.connectSocket({ url: url });
+                            // wx not suppert binaryType
+                            // if (transferFormat === TransferFormat.Binary) {
+                            //     webSocket.binaryType = "arraybuffer";
+                            // }
+                            // tslint:disable-next-line:variable-name
+                            webSocket.onOpen(function () {
+                                // webSocket.onOpen = () => {
+                                _this.logger.log(LogLevel.Information, "WebSocket connected to " + url);
+                                _this.webSocket = webSocket;
+                                _this.state = true;
+                                resolve();
+                            });
+                            webSocket.onError(function (error) {
+                                // webSocket.onError = (error: any) => {
+                                reject(error);
+                            });
+                            webSocket.onMessage(function (data) {
+                                _this.logger.log(LogLevel.Trace, "(WebSockets transport) data received. " + getDataDetail(data, _this.logMessageContent) + ".");
+                                if (_this.onreceive) {
+                                    _this.onreceive(data.data);
+                                }
+                            });
+                            webSocket.onClose(function () { return _this.close(); });
+                        })];
+                }
+            });
+        });
+    };
+    WebSocketTransport.prototype.send = function (data) {
+        if (this.webSocket && this.state) {
+            this.logger.log(LogLevel.Trace, "(WebSockets transport) sending data. " + getDataDetail(data, this.logMessageContent) + ".");
+            var ws_1 = this.webSocket;
+            return new Promise(function (resolve, reject) {
+                ws_1.send({
+                    data: data,
+                    fail: reject,
+                    success: resolve,
+                });
+            });
+        }
+        return Promise.reject("WebSocket is not in the OPEN state");
+    };
+    WebSocketTransport.prototype.stop = function () {
+        if (this.webSocket) {
+            // Clear websocket handlers because we are considering the socket closed now
+            this.webSocket.onClose = function () { };
+            this.webSocket.onMessage = function () { };
+            this.webSocket.onError = function () { };
+            this.webSocket.close({});
+            this.webSocket = undefined;
+            // Manually invoke onclose callback inline so we know the HttpConnection was closed properly before returning
+            // This also solves an issue where websocket.onclose could take 18+ seconds to trigger during network disconnects
+            this.close(undefined);
+        }
+        return Promise.resolve();
+    };
+    WebSocketTransport.prototype.close = function (event) {
+        // webSocket will be null if the transport did not start successfully
+        this.state = false;
+        this.logger.log(LogLevel.Trace, "(WebSockets transport) socket closed.");
+        if (this.onclose) {
+            if (event && (event.wasClean === false || event.code !== 1000)) {
+                this.onclose(new Error("Websocket closed with status code: " + event.code + " (" + event.reason + ")"));
+            }
+            else {
+                this.onclose();
+            }
+        }
+    };
+    return WebSocketTransport;
+}());
+export { WebSocketTransport };
+//# sourceMappingURL=WebSocketTransport.js.map
