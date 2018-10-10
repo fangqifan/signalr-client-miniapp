@@ -16,19 +16,12 @@
         "noEmitOnError": true,
         "stripInternal": true,
         "strict": true,
-        "lib": [ "es5", "es2015.promise", "es2015.iterable", "dom" ],
-        "baseUrl": ".",
-        "paths": {
-            // "@aspnet/signalr": [
-            //     "./signalr"
-            // ],
-            // "@aspnet/signalr-protocol-msgpack": [
-            //     "./signalr-protocol-msgpack"
-            // ]
-            "signalr-client-miniapp": [
-                "."
-            ]
-        }
+        "lib": [
+            "es5",
+            "es2015.promise",
+            "es2015.iterable"
+        ],
+        "baseUrl": "."
     },
     "include": [
         "./src/**/*"

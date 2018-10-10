@@ -367,18 +367,7 @@ var HttpConnection = /** @class */ (function () {
         if (url.lastIndexOf("https://", 0) === 0 || url.lastIndexOf("http://", 0) === 0) {
             return url;
         }
-        if (typeof window === "undefined" || !window || !window.document) {
-            throw new Error("Cannot resolve '" + url + "'.");
-        }
-        // Setting the url to the href propery of an anchor tag handles normalization
-        // for us. There are 3 main cases.
-        // 1. Relative  path normalization e.g "b" -> "http://localhost:5000/a/b"
-        // 2. Absolute path normalization e.g "/a/b" -> "http://localhost:5000/a/b"
-        // 3. Networkpath reference normalization e.g "//localhost:5000/a/b" -> "http://localhost:5000/a/b"
-        var aTag = window.document.createElement("a");
-        aTag.href = url;
-        this.logger.log(ILogger_1.LogLevel.Information, "Normalizing '" + url + "' to '" + aTag.href + "'.");
-        return aTag.href;
+        throw new Error("Cannot resolve '" + url + "'.");
     };
     HttpConnection.prototype.resolveNegotiateUrl = function (url) {
         var index = url.indexOf("?");

@@ -18,7 +18,7 @@ export interface HttpRequest {
     headers?: { [key: string]: string };
 
     /** The XMLHttpRequestResponseType to apply to the request. */
-    responseType?: XMLHttpRequestResponseType;
+    responseType?: ("" | "arraybuffer" | "text");
 
     /** An AbortSignal that can be monitored for cancellation. */
     abortSignal?: AbortSignal;

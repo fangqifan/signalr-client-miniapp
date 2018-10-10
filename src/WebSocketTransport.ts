@@ -100,22 +100,18 @@ export class WebSocketTransport implements ITransport {
 
             // Manually invoke onclose callback inline so we know the HttpConnection was closed properly before returning
             // This also solves an issue where websocket.onclose could take 18+ seconds to trigger during network disconnects
-            this.close(undefined);
+            this.close();
         }
 
         return Promise.resolve();
     }
 
-    private close(event?: CloseEvent): void {
+    private close(): void {
         // webSocket will be null if the transport did not start successfully
         this.state = false;
         this.logger.log(LogLevel.Trace, "(WebSockets transport) socket closed.");
         if (this.onclose) {
-            if (event && (event.wasClean === false || event.code !== 1000)) {
-                this.onclose(new Error(`Websocket closed with status code: ${event.code} (${event.reason})`));
-            } else {
-                this.onclose();
-            }
+            this.onclose();
         }
     }
 }

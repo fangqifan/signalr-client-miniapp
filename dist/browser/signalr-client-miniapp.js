@@ -1649,7 +1649,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MiniAppHttpClient", function() { return MiniAppHttpClient; });
 /* harmony import */ var _Errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
 /* harmony import */ var _HttpClient__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(5);
-// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) fangqifan@kirinsoft.cn. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -3146,18 +3146,7 @@ var HttpConnection = /** @class */ (function () {
         if (url.lastIndexOf("https://", 0) === 0 || url.lastIndexOf("http://", 0) === 0) {
             return url;
         }
-        if (typeof window === "undefined" || !window || !window.document) {
-            throw new Error("Cannot resolve '" + url + "'.");
-        }
-        // Setting the url to the href propery of an anchor tag handles normalization
-        // for us. There are 3 main cases.
-        // 1. Relative  path normalization e.g "b" -> "http://localhost:5000/a/b"
-        // 2. Absolute path normalization e.g "/a/b" -> "http://localhost:5000/a/b"
-        // 3. Networkpath reference normalization e.g "//localhost:5000/a/b" -> "http://localhost:5000/a/b"
-        var aTag = window.document.createElement("a");
-        aTag.href = url;
-        this.logger.log(_ILogger__WEBPACK_IMPORTED_MODULE_1__["LogLevel"].Information, "Normalizing '" + url + "' to '" + aTag.href + "'.");
-        return aTag.href;
+        throw new Error("Cannot resolve '" + url + "'.");
     };
     HttpConnection.prototype.resolveNegotiateUrl = function (url) {
         var index = url.indexOf("?");
@@ -3340,21 +3329,16 @@ var WebSocketTransport = /** @class */ (function () {
             this.webSocket = undefined;
             // Manually invoke onclose callback inline so we know the HttpConnection was closed properly before returning
             // This also solves an issue where websocket.onclose could take 18+ seconds to trigger during network disconnects
-            this.close(undefined);
+            this.close();
         }
         return Promise.resolve();
     };
-    WebSocketTransport.prototype.close = function (event) {
+    WebSocketTransport.prototype.close = function () {
         // webSocket will be null if the transport did not start successfully
         this.state = false;
         this.logger.log(_ILogger__WEBPACK_IMPORTED_MODULE_0__["LogLevel"].Trace, "(WebSockets transport) socket closed.");
         if (this.onclose) {
-            if (event && (event.wasClean === false || event.code !== 1000)) {
-                this.onclose(new Error("Websocket closed with status code: " + event.code + " (" + event.reason + ")"));
-            }
-            else {
-                this.onclose();
-            }
+            this.onclose();
         }
     };
     return WebSocketTransport;
